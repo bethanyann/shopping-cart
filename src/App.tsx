@@ -8,7 +8,8 @@ import Grid from '@material-ui/core/Grid';
 import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
 import Badge from '@material-ui/core/Badge';
 //styles
-import { StyledWrapper } from './App.styles';
+import { StyledWrapper, StyledButton } from './App.styles';
+
 //Types
 export type CartItemType =
 {
@@ -29,14 +30,21 @@ const getProducts = async (): Promise<CartItemType[]> => {
 }
 
 const App =() => {
-//Query key which is 'products' and then provide it with a function 'getProducts'
+  //setting out a few states we will need for our cart behavior (open or not)
+  const [cartOpen, setCartOpen] = useState(false);
+
+  //setting out states we will need for the items in the cart
+  const [cartItems, setCartItems] = useState([] as CartItemType[]);  //set the type to an empty array of type CartItemType[]
+
+  //Query key which is 'products' and then provide it with a function 'getProducts'
   const {data, isLoading, error} = useQuery<CartItemType[]>(
     'products',
     getProducts);
 
   console.log(data);
 
-  const getTotalItems = () => null;
+  //this will use an acumulator to iterate through all of the items in the cart and will use the property 'amount' and will give the total amount that is in the cart,  and initilize with 0
+  const getTotalItems = (items: CartItemType[]) => items.reduce((ack:number, item) => ack + item.amount,  0);
 
   const handleAddToCart = (clickedItem: CartItemType) => null;
 
@@ -47,9 +55,16 @@ const App =() => {
   if(error) return <div>Something went wrong</div>;
 
   return (
-    <div>
-
-     <Grid container spacing={3}>
+    <StyledWrapper>
+      <Drawer anchor='right' open={cartOpen} onClose={() => setCartOpen(false)}>
+        Cart goes here
+      </Drawer>
+      <StyledButton onClick={() => setCartOpen(true)}>
+        <Badge badgeContent={getTotalItems(cartItems)} color='error'>
+           <AddShoppingCartIcon />
+        </Badge>
+      </StyledButton>
+      <Grid container spacing={3}>
        {/* use question mark after 'data' so that it doesn't error if data is undefined*/}
        {data?.map(item => (
          <Grid item key={item.id} xs={12} sm={4}>
@@ -57,8 +72,7 @@ const App =() => {
          </Grid>
        ))}
      </Grid>
-
-   </div>
+    </StyledWrapper>
   );
 }
 
