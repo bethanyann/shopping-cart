@@ -44,12 +44,43 @@ const App =() => {
 
   console.log(data);
 
-  //this will use an acumulator to iterate through all of the items in the cart and will use the property 'amount' and will give the total amount that is in the cart,  and initilize with 0
+  //this will use an acumulator to iterate through all of the items in the cart and will use the property 
+  //'amount' and will give the total amount that is in the cart,  and initilize with 0
   const getTotalItems = (items: CartItemType[]) => items.reduce((ack:number, item) => ack + item.amount,  0);
 
-  const handleAddToCart = (clickedItem: CartItemType) => null;
+  const handleAddToCart = (clickedItem: CartItemType) =>{
+    //when this button is clicked we will set the cart items
+    setCartItems(previousCart => {
+      //explicit return
+      //1. is the item already added in the cart? 
+      const isItemInCart = previousCart.find(item => item.id === clickedItem.id);
+      
+      //if item is already in cart, update the amount on that specfic item
+      if(isItemInCart){
+        return previousCart.map(item => ( item.id === clickedItem.id ? { ...item, amount: item.amount+1} : item ));
+      }
+      //else first time item has been added
+      //spread out the previous cart, and then create an object and spread out the clicked item, setting it's amount property to 1
+      return [...previousCart, { ...clickedItem, amount: 1}];
+    })
+  };
 
-  const handleRemoveFromCart = () => null;
+  const handleRemoveFromCart = (id: number) => {
+    setCartItems(prevCart => (
+      prevCart.reduce((ack, item) => {
+        if(item.id === id)
+        { 
+          //if there's only one item in the cart and it gets removed then just return the accumulator and nothing else which will delete the item from the array
+          if(item.amount === 1)  return ack;
+          //otherwise we remove one from the amount
+          return [...ack, { ...item, amount: item.amount-1}];
+        }
+        else{
+          return [...ack, item];
+        }
+      },[] as CartItemType[])
+    ))
+  };
 
   //if something is loading return a little loading thing from materialUI
   if(isLoading) return <LinearProgress/>;
